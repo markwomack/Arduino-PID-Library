@@ -8,28 +8,29 @@
 #define PIN_INPUT 0
 #define PIN_OUTPUT 3
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+// Define Variables we'll be connecting to
+double setpoint;
+double input;
+double output;
 
-//Specify the links and initial tuning parameters
-double Kp=2, Ki=5, Kd=1;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+// Specify the links and initial tuning parameters
+double Kp=2;
+double Ki=5;
+double Kd=1;
 
-void setup()
-{
-  //initialize the variables we're linked to
-  Input = analogRead(PIN_INPUT);
-  Setpoint = 100;
+PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
 
-  //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+void setup() {
+  // Initialize the variables we're linked to
+  input = analogRead(PIN_INPUT);
+  setpoint = 100;
+
+  // Turn the PID on
+  myPID.setMode(AUTOMATIC);
 }
 
-void loop()
-{
-  Input = analogRead(PIN_INPUT);
-  myPID.Compute();
-  analogWrite(PIN_OUTPUT, Output);
+void loop() {
+  input = analogRead(PIN_INPUT);
+  myPID.compute();
+  analogWrite(PIN_OUTPUT, output);
 }
-
-

@@ -1,90 +1,109 @@
+/******************************************************************************
+ * Arduino PID Library - Version 1.2.1
+ * by Brett Beauregard <br3ttb@gmail.com> brettbeauregard.com
+ *
+ * This Library is licensed under the MIT License.
+ *
+ * Reformatted and modernized by Mark Womack (https://github.com/markwomack).
+ * Functionality is the same, but the method names have changed slightly.
+ *****************************************************************************/
+
 #ifndef PID_v1_h
 #define PID_v1_h
 #define LIBRARY_VERSION	1.2.1
 
-class PID
-{
-
-
+class PID {
   public:
 
-  //Constants used in some of the functions below
-  #define AUTOMATIC	1
-  #define MANUAL	0
-  #define DIRECT  0
-  #define REVERSE  1
-  #define P_ON_M 0
-  #define P_ON_E 1
+    // Constants used in the functions below
+    #define AUTOMATIC 1
+    #define MANUAL 0
+    #define DIRECT 0
+    #define REVERSE 1
+    #define P_ON_M 0
+    #define P_ON_E 1
 
-  //commonly used functions **************************************************************************
-    PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int, int);//   Setpoint.  Initial tuning parameters are also set here.
-                                          //   (overload for specifying proportional mode)
+    // Links the PID to the Input, Output, and Setpoint.
+    // Initial tuning parameters are also set here.
+    // (overload for specifying proportional mode)
+    PID(double* inputPtr, double* outputPtr, double* setpointPtr,
+        double Kp, double Ki, double Kd, int pOn, int controllerDirection);                                          
 
-    PID(double*, double*, double*,        // * constructor.  links the PID to the Input, Output, and 
-        double, double, double, int);     //   Setpoint.  Initial tuning parameters are also set here
+    // Links the PID to the Input, Output, and Setpoint.
+    // Initial tuning parameters are also set here.
+    PID(double* inputPtr, double* outputPtr, double* setpointPtr,
+        double Kp, double Ki, double Kd, int controllerDirection);
 	
-    void SetMode(int Mode);               // * sets PID to either Manual (0) or Auto (non-0)
+    // Sets PID to either Manual (0) or Auto (non-0)
+    void setMode(int mode);
 
-    bool Compute();                       // * performs the PID calculation.  it should be
-                                          //   called every time loop() cycles. ON/OFF and
-                                          //   calculation frequency can be set using SetMode
-                                          //   SetSampleTime respectively
+    // Performs the PID calculation. It should be
+    // called every time loop() cycles. ON/OFF and
+    // calculation frequency can be set using SetMode
+    // SetSampleTime respectively
+    bool compute();
 
-    void SetOutputLimits(double, double); // * clamps the output to a specific range. 0-255 by default, but
-										                      //   it's likely the user will want to change this depending on
-										                      //   the application
-	
+    // Clamps the output to a specific range. 0-255 by default, but
+    // it's likely the user will want to change this depending on
+    // the application
+    void setOutputLimits(double outputMin, double outputMax);
 
+    // While most users will set the tunings once in the 
+    // constructor, this function gives the user the option
+    // of changing tunings during runtime for Adaptive control
+    // overload for specifying proportional mode.
+    void setTunings(double Kp, double Ki, double Kd);                                  
+    void setTunings(double Kp, double Ki, double Kd, int pOn);         	  
 
-  //available but not commonly used functions ********************************************************
-    void SetTunings(double, double,       // * While most users will set the tunings once in the 
-                    double);         	    //   constructor, this function gives the user the option
-                                          //   of changing tunings during runtime for Adaptive control
-    void SetTunings(double, double,       // * overload for specifying proportional mode
-                    double, int);         	  
-
-	void SetControllerDirection(int);	  // * Sets the Direction, or "Action" of the controller. DIRECT
-										  //   means the output will increase when error is positive. REVERSE
-										  //   means the opposite.  it's very unlikely that this will be needed
-										  //   once it is set in the constructor.
-    void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
-                                          //   the PID calculation is performed.  default is 100
+    // Sets the Direction, or "Action" of the controller. DIRECT
+    // means the output will increase when error is positive. REVERSE
+    // means the opposite.  it's very unlikely that this will be needed
+    // once it is set in the constructor.
+    void setControllerDirection(int direction);
+    
+    // Sets the frequency, in milliseconds, with which 
+    // the PID calculation is performed. Default is 100.
+    void setSampleTime(unsigned long sampleTime);
 										  
-										  
-										  
-  //Display functions ****************************************************************
-	double GetKp();						  // These functions query the pid for interal values.
-	double GetKi();						  //  they were created mainly for the pid front-end,
-	double GetKd();						  // where it's important to know what is actually 
-	int GetMode();						  //  inside the PID.
-	int GetDirection();					  //
+    double getKp();
+    double getKi();
+    double getKd();
+    int getMode();
+    int getDirection();
 
   private:
-	void Initialize();
-	
-	double dispKp;				// * we'll hold on to the tuning parameters in user-entered 
-	double dispKi;				//   format for display purposes
-	double dispKd;				//
+    void initialize();
+
+    // The tuning parameters in user-entered format for display purposes.
+    double _dispKp;
+    double _dispKi;
+    double _dispKd;
     
-	double kp;                  // * (P)roportional Tuning Parameter
-    double ki;                  // * (I)ntegral Tuning Parameter
-    double kd;                  // * (D)erivative Tuning Parameter
+    double _Kp;  // * (P)roportional Tuning Parameter
+    double _Ki;  // * (I)ntegral Tuning Parameter
+    double _Kd;  // * (D)erivative Tuning Parameter
 
-	int controllerDirection;
-	int pOn;
+    int _controllerDirection;
+    int _pOn;
 
-    double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
-    double *myOutput;             //   This creates a hard link between the variables and the 
-    double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
-                                  //   what these values are.  with pointers we'll just know.
-			  
-	unsigned long lastTime;
-	double outputSum, lastInput;
+    // Pointers to the Input, Output, and Setpoint variables.
+    // This creates a hard link between the variables and the 
+    // PID, freeing the user from having to constantly tell us
+    // what these values are.  with pointers we'll just know.
+    double* _inputPtr;
+    double* _outputPtr;
+    double* _setpointPtr;
+                                  	  
+    unsigned long _lastTime;
+    double _outputSum;
+    double _lastInput;
 
-	unsigned long SampleTime;
-	double outMin, outMax;
-	bool inAuto, pOnE;
+    unsigned long _sampleTime;
+    double _outMin;
+    double _outMax;
+    bool _inAuto;
+    bool _pOnE;
 };
-#endif
+
+#endif // PID_v1_h
 

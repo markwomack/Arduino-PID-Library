@@ -8,29 +8,27 @@
 
 #include <PID_v1.h>
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+// Define Variables we'll be connecting to
+double setpoint;
+double input;
+double output;
 
-//Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint,2,5,1,P_ON_M, DIRECT); //P_ON_M specifies that Proportional on Measurement be used
-                                                            //P_ON_E (Proportional on Error) is the default behavior
+// Specify the links and initial tuning parameters
+//P_ON_M specifies that Proportional on Measurement be used
+//P_ON_E (Proportional on Error) is the default behavior
+PID myPID(&input, &output, &setpoint, 2, 5, 1, P_ON_M, DIRECT);
 
-void setup()
-{
+void setup() {
   //initialize the variables we're linked to
-  Input = analogRead(0);
-  Setpoint = 100;
+  input = analogRead(0);
+  setpoint = 100;
 
   //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+  myPID.setMode(AUTOMATIC);
 }
 
-void loop()
-{
-  Input = analogRead(0);
-  myPID.Compute();
-  analogWrite(3,Output);
+void loop() {
+  input = analogRead(0);
+  myPID.compute();
+  analogWrite(3, output);
 }
-
-
-

@@ -19,46 +19,49 @@
 #define PIN_INPUT 0
 #define RELAY_PIN 6
 
-//Define Variables we'll be connecting to
-double Setpoint, Input, Output;
+// Define Variables we'll be connecting to
+double setpoint;
+double input;
+double output;
 
-//Specify the links and initial tuning parameters
-double Kp=2, Ki=5, Kd=1;
-PID myPID(&Input, &Output, &Setpoint, Kp, Ki, Kd, DIRECT);
+// Specify the links and initial tuning parameters
+double Kp=2;
+double Ki=5;
+double Kd=1;
+PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
 
-int WindowSize = 5000;
+unsigned long windowSize = 5000;
 unsigned long windowStartTime;
 
-void setup()
-{
+void setup() {
   windowStartTime = millis();
 
   //initialize the variables we're linked to
-  Setpoint = 100;
+  setpoint = 100;
 
   //tell the PID to range between 0 and the full window size
-  myPID.SetOutputLimits(0, WindowSize);
+  myPID.setOutputLimits(0, windowSize);
 
   //turn the PID on
-  myPID.SetMode(AUTOMATIC);
+  myPID.setMode(AUTOMATIC);
 }
 
-void loop()
-{
-  Input = analogRead(PIN_INPUT);
-  myPID.Compute();
+void loop() {
+  input = analogRead(PIN_INPUT);
+  myPID.compute();
 
   /************************************************
    * turn the output pin on/off based on pid output
    ************************************************/
-  if (millis() - windowStartTime > WindowSize)
-  { //time to shift the Relay Window
-    windowStartTime += WindowSize;
+  if ((millis() - windowStartTime) > windowSize) {
+    //time to shift the Relay Window
+    windowStartTime += windowSize;
   }
-  if (Output < millis() - windowStartTime) digitalWrite(RELAY_PIN, HIGH);
-  else digitalWrite(RELAY_PIN, LOW);
+  
+  if (output < (millis() - windowStartTime)) {
+    digitalWrite(RELAY_PIN, HIGH);
+  } else {
+    digitalWrite(RELAY_PIN, LOW);
+  }
 
 }
-
-
-
